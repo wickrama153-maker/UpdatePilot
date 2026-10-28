@@ -70,14 +70,31 @@ app.use('/api/v1/agent', agentRouter);
 app.use('/api/v1/notifications', notificationsRouter);
 
 // Serve static frontend UI if available (for production desktop app / single-port hosting)
-const staticWebDir = process.env.STATIC_WEB_DIR || path.resolve(__dirname, '../../web/out');
-if (fs.existsSync(staticWebDir)) {
-  logger.info(`Serving static frontend UI from ${staticWebDir}`);
-  app.use(express.static(staticWebDir));
+const candidateDirs = [
+  process.env.STATIC_WEB_DIR,
+  path.resolve(__dirname, '../../web/out'),
+  path.resolve(__dirname, '../web/out'),
+  path.resolve(__dirname, '../../apps/web/out'),
+  typeof (process as any).resourcesPath !== 'undefined' ? path.resolve((process as any).resourcesPath, 'web/out') : null,
+].filter(Boolean) as string[];
+
+let resolvedStaticDir: string | null = null;
+for (const dir of candidateDirs) {
+  if (fs.existsSync(dir) && fs.existsSync(path.join(dir, 'index.html'))) {
+    resolvedStaticDir = dir;
+    break;
+  }
+}
+
+if (resolvedStaticDir) {
+  logger.info(`Serving static frontend UI from ${resolvedStaticDir}`);
+  app.use(express.static(resolvedStaticDir));
   app.get('*', (req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(staticWebDir, 'index.html'));
+    res.sendFile(path.join(resolvedStaticDir!, 'index.html'));
   });
+} else {
+  logger.warn('Static frontend UI directory not found; API routes active only.');
 }
 
 // Centralized Error Handler

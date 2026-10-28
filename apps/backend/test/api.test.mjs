@@ -1,7 +1,26 @@
-import { test } from 'node:test';
+import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { app } from '../dist/app.js';
 
 const BASE_URL = 'http://localhost:4000/api/v1';
+let localServer = null;
+
+before(async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/health`);
+    if (res.ok) return;
+  } catch {
+    await new Promise((resolve) => {
+      localServer = app.listen(4000, resolve);
+    });
+  }
+});
+
+after(() => {
+  if (localServer) {
+    localServer.close();
+  }
+});
 
 test('API Healthcheck', async () => {
   const res = await fetch(`${BASE_URL}/health`);

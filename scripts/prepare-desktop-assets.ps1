@@ -14,6 +14,24 @@ if (Test-Path $targetDir) {
 }
 New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
 
+# 0. Ensure workspaces are built
+Write-Host " Compiling backend..."
+Push-Location (Join-Path $repoRoot "apps\backend")
+& npm.cmd run build
+Pop-Location
+
+Write-Host " Compiling agent..."
+Push-Location (Join-Path $repoRoot "apps\agent")
+& npm.cmd run build
+Pop-Location
+
+Write-Host " Ensuring web static export..."
+if (-not (Test-Path (Join-Path $repoRoot "apps\web\out\index.html"))) {
+    Push-Location (Join-Path $repoRoot "apps\web")
+    & npm.cmd run build
+    Pop-Location
+}
+
 # 1. Backend compiled assets
 $backendDistTarget = Join-Path $targetDir "backend\dist"
 New-Item -ItemType Directory -Path $backendDistTarget -Force | Out-Null

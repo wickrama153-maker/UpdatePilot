@@ -2,14 +2,15 @@ import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as http from 'http';
+import * as net from 'net';
 import * as os from 'os';
 import { spawn, ChildProcess } from 'child_process';
 
 let mainWindow: BrowserWindow | null = null;
 let backendProcess: ChildProcess | null = null;
 let agentProcess: ChildProcess | null = null;
+let activePort = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 const isPackaged = app.isPackaged;
 
 // Request single-instance lock
@@ -22,6 +23,23 @@ if (!gotTheLock) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
     }
+  });
+}
+
+// Find a free TCP port starting from preferredPort
+function getAvailablePort(preferredPort: number = 4000): Promise<number> {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.once('error', () => {
+      // If port is occupied by another process, try the next port
+      resolve(getAvailablePort(preferredPort + 1));
+    });
+    server.once('listening', () => {
+      const addr = server.address() as net.AddressInfo;
+      const port = addr.port;
+      server.close(() => resolve(port));
+    });
+    server.listen(preferredPort, '127.0.0.1');
   });
 }
 
@@ -66,7 +84,7 @@ function killChild(proc: ChildProcess | null, name: string) {
 }
 
 // Start backend Express server as a child process
-function startBackend(): Promise<void> {
+function startBackend(port: number): Promise<void> {
   return new Promise((resolve) => {
     const backendScript = isPackaged
       ? path.join(process.resourcesPath, 'backend', 'dist', 'index.js')
@@ -79,14 +97,14 @@ function startBackend(): Promise<void> {
     const nodeExecutable = isPackaged ? process.execPath : 'node';
     const backendEnv: NodeJS.ProcessEnv = {
       ...process.env,
-      PORT: String(PORT),
+      PORT: String(port),
       DATABASE_URL: `file:${dbFilePath.replace(/\\/g, '/')}`,
       STATIC_WEB_DIR: staticWebDir,
       NODE_ENV: 'production',
       ELECTRON_RUN_AS_NODE: '1',
     };
 
-    console.log(`[Main] Launching backend from ${backendScript} using ${nodeExecutable}...`);
+    console.log(`[Main] Launching backend from ${backendScript} on port ${port}...`);
     const backendLogStream = fs.createWriteStream(path.join(logsDir, 'backend.log'), { flags: 'a' });
 
     backendProcess = spawn(nodeExecutable, [backendScript], {
@@ -113,7 +131,7 @@ function startBackend(): Promise<void> {
 }
 
 // Start native Windows Local Agent as a child process
-function startAgent(): void {
+function startAgent(port: number): void {
   const agentScript = isPackaged
     ? path.join(process.resourcesPath, 'agent', 'dist', 'index.js')
     : path.resolve(__dirname, '../../agent/dist/index.js');
@@ -121,7 +139,7 @@ function startAgent(): void {
   const nodeExecutable = isPackaged ? process.execPath : 'node';
   const agentEnv: NodeJS.ProcessEnv = {
     ...process.env,
-    API_BASE_URL: `http://localhost:${PORT}/api/v1`,
+    API_BASE_URL: `http://127.0.0.1:${port}/api/v1`,
     NODE_ENV: 'production',
     ELECTRON_RUN_AS_NODE: '1',
   };
@@ -275,6 +293,11 @@ function createWindow() {
     },
   });
 
+  // Keep title as UpdatePilot
+  mainWindow.on('page-title-updated', (event) => {
+    event.preventDefault();
+  });
+
   // Display window once styled content is loaded
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
@@ -292,7 +315,7 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (!url.startsWith(`http://localhost:${PORT}`) && !url.startsWith('data:')) {
+    if (!url.startsWith(`http://127.0.0.1:${activePort}`) && !url.startsWith(`http://localhost:${activePort}`) && !url.startsWith('data:')) {
       event.preventDefault();
       shell.openExternal(url);
     }
@@ -344,21 +367,25 @@ app.whenReady().then(async () => {
   setupIpcHandlers();
   createWindow();
 
+  // Determine available port
+  activePort = await getAvailablePort(activePort);
+  console.log(`[Main] UpdatePilot binding to active port ${activePort}`);
+
   // Launch backend and agent
-  await startBackend();
-  startAgent();
+  await startBackend(activePort);
+  startAgent(activePort);
 
   // Wait for backend to be ready
-  const isHealthy = await waitForBackend(`http://localhost:${PORT}/api/v1/health`, 25000);
+  const isHealthy = await waitForBackend(`http://127.0.0.1:${activePort}/api/v1/health`, 25000);
   if (isHealthy && mainWindow) {
-    console.log(`[Main] Backend online. Navigating window to http://localhost:${PORT}...`);
-    mainWindow.loadURL(`http://localhost:${PORT}`);
+    console.log(`[Main] Backend online. Navigating window to http://127.0.0.1:${activePort}...`);
+    mainWindow.loadURL(`http://127.0.0.1:${activePort}`);
   } else if (mainWindow) {
     console.error('[Main] Backend failed to report healthy status within timeout.');
     mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`
       <div style="background:#0b1120;color:#f8fafc;font-family:sans-serif;padding:40px;text-align:center;">
         <h2 style="color:#ef4444;">Service Startup Error</h2>
-        <p>Unable to connect to UpdatePilot Backend API on port ${PORT}.</p>
+        <p>Unable to connect to UpdatePilot Backend API on port ${activePort}.</p>
         <p style="color:#94a3b8;font-size:12px;">Logs are located at: ${path.join(logsDir, 'backend.log')}</p>
         <button onclick="location.reload()" style="background:#2563eb;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;margin-top:16px;">
           Retry Startup
