@@ -1,0 +1,20 @@
+{
+  "name": "@updatepilot/desktop",
+  "version": "1.0.0",
+  "description": "Windows Desktop Application for UpdatePilot",
+  "main": "dist/main.js",
+  "author": "UpdatePilot Software",
+  "scripts": {
+    "build": "tsc",
+    "desktop": "tsc && electron .",
+    "prepare-assets": "powershell -ExecutionPolicy Bypass -File ../../scripts/prepare-desktop-assets.ps1",
+    "dist": "tsc && npm run prepare-assets && electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "app-builder-bin": "^5.0.0-alpha.10",
+    "electron": "31.7.7",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.5.4"
+  }
+}

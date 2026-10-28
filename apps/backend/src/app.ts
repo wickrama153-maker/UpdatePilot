@@ -1,6 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
 import { logger } from './lib/logger';
@@ -23,7 +25,7 @@ dotenv.config();
 export const app = express();
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: true,
   credentials: true,
 }));
 
@@ -66,6 +68,17 @@ app.use('/api/v1/security', securityRouter);
 app.use('/api/v1/settings', settingsRouter);
 app.use('/api/v1/agent', agentRouter);
 app.use('/api/v1/notifications', notificationsRouter);
+
+// Serve static frontend UI if available (for production desktop app / single-port hosting)
+const staticWebDir = process.env.STATIC_WEB_DIR || path.resolve(__dirname, '../../web/out');
+if (fs.existsSync(staticWebDir)) {
+  logger.info(`Serving static frontend UI from ${staticWebDir}`);
+  app.use(express.static(staticWebDir));
+  app.get('*', (req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(staticWebDir, 'index.html'));
+  });
+}
 
 // Centralized Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

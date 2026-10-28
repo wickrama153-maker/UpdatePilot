@@ -1,7 +1,19 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+const getBaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    // If running in browser/electron pointing to our local backend server
+    if (window.location && window.location.origin && window.location.origin.startsWith('http')) {
+      const port = window.location.port;
+      if (port === '4000' || port === '' || !port) {
+        return `${window.location.origin}/api/v1`;
+      }
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+};
 
 export async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
-  const url = `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const baseUrl = getBaseUrl();
+  const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
   const res = await fetch(url, {
     ...options,
     headers: {
@@ -58,7 +70,7 @@ export const api = {
   markAllNotificationsRead: () => fetchApi<any>('/notifications/read-all', { method: 'POST' }),
   deleteNotification: (id: string) => fetchApi<any>(`/notifications/${id}`, { method: 'DELETE' }),
   getHistory: (type?: string) => fetchApi<any>(`/history${type ? `?type=${type}` : ''}`),
-  exportInventoryCsvUrl: () => `${BASE_URL}/history/export?format=csv`,
+  exportInventoryCsvUrl: () => `${getBaseUrl()}/history/export?format=csv`,
   getSecurityFindings: () => fetchApi<any[]>('/security/findings'),
   triggerSecurityScan: () => fetchApi<any>('/security/scan', { method: 'POST' }),
   getSettings: () => fetchApi<any>('/settings'),
