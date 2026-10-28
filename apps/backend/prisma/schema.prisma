@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Device {
+  id           String            @id @default(uuid())
+  name         String
+  osName       String            @default("Windows")
+  osVersion    String            @default("Windows 10/11")
+  architecture String            @default("x64")
+  agentVersion String            @default("1.0.0")
+  status       String            @default("ONLINE") // ONLINE, OFFLINE, BUSY, REVOKED
+  lastSeenAt   DateTime          @default(now())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  credentials  AgentCredential[]
+  applications Application[]
+  scanJobs     ScanJob[]
+  updateJobs   UpdateJob[]
+  auditEvents  AuditEvent[]
+
+  @@index([status])
+}
+
+model AgentCredential {
+  id          String    @id @default(uuid())
+  deviceId    String
+  device      Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  hashedToken String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  rotatedAt   DateTime?
+  revokedAt   DateTime?
+
+  @@index([deviceId])
+}
+
+model Application {
+  id               String      @id @default(uuid())
+  deviceId         String
+  device           Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  name             String
+  publisher        String?
+  installedVersion String
+  packageId        String?
+  source           String      @default("winget") // winget, msstore, registry, custom
+  updateStatus     String      @default("UNKNOWN") // UP_TO_DATE, UPDATE_AVAILABLE, UNKNOWN, UNSUPPORTED, UNMATCHED
+  availableVersion String?
+  releaseDate      String?
+  changelogUrl     String?
+  publisherUrl     String?
+  isPinned         Boolean     @default(false)
+  lastScannedAt    DateTime    @default(now())
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  updateJobs       UpdateJob[]
+
+  @@unique([deviceId, name, installedVersion])
+  @@index([deviceId, updateStatus])
+  @@index([packageId])
+}
+
+model ReleaseMetadata {
+  id           String   @id @default(uuid())
+  packageId    String
+  version      String
+  channel      String?  @default("stable")
+  releaseDate  String?
+  changelogUrl String?
+  publisherUrl String?
+  source       String   @default("winget")
+  fetchedAt    DateTime @default(now())
+
+  @@unique([packageId, version])
+  @@index([packageId])
+}
+
+model ScanJob {
+  id              String    @id @default(uuid())
+  deviceId        String
+  device          Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  status          String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED, CANCELLED
+  progressPercent Int       @default(0)
+  totalFound      Int       @default(0)
+  updatesFound    Int       @default(0)
+  errorSummary    String?
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  @@index([deviceId, status])
+}
+
+model UpdateJob {
+  id                 String       @id @default(uuid())
+  deviceId           String
+  device             Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  applicationId      String
+  application        Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  applicationName    String
+  packageId          String
+  installedVersion   String
+  targetVersion      String
+  status             String       @default("PENDING") // PENDING, PREVIEWED, APPROVED, EXECUTING, VERIFYING, COMPLETED, FAILED, REBOOT_REQUIRED, CANCELLED
+  initiator          String       @default("local_user")
+  exitCode           Int?
+  verificationResult String?
+  errorSummary       String?
+  requiresReboot     Boolean      @default(false)
+  startedAt          DateTime     @default(now())
+  completedAt        DateTime?
+
+  @@index([deviceId, status])
+}
+
+model AuditEvent {
+  id        String   @id @default(uuid())
+  actor     String   @default("user")
+  deviceId  String?
+  device    Device?  @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  eventType String
+  target    String?
+  details   String?  // JSON string
+  timestamp DateTime @default(now())
+
+  @@index([eventType])
+  @@index([timestamp])
+}
+
+model SecurityFinding {
+  id                   String   @id @default(uuid())
+  packageId            String
+  applicationName      String
+  advisoryId           String   // e.g. GHSA-xxxx-xxxx or CVE-2024-xxxx
+  title                String
+  severity             String   @default("UNKNOWN") // CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN
+  affectedVersionRange String
+  source               String   @default("OSV")
+  advisoryUrl          String?
+  publishedAt          String?
+  lastVerifiedAt       DateTime @default(now())
+
+  @@unique([packageId, advisoryId])
+  @@index([packageId])
+}
+
+model UserSettings {
+  id                String   @id @default("default")
+  theme             String   @default("dark") // dark, light, system
+  scanIntervalHours Int      @default(24)
+  autoCheckUpdates  Boolean  @default(true)
+  notifyOnUpdate    Boolean  @default(true)
+  telemetryEnabled  Boolean  @default(false)
+  retentionDays     Int      @default(90)
+  updatedAt         DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, UPDATE, SECURITY, SCAN, WARNING
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@index([isRead])
+  @@index([createdAt])
+}

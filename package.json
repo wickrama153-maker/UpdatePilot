@@ -1,0 +1,21 @@
+{
+  "name": "updatepilot-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UpdatePilot - Software Update Intelligence & Management Platform",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:agent": "npm run dev --workspace=apps/agent",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
