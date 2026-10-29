@@ -95,11 +95,16 @@ function startBackend(port: number): Promise<void> {
       : path.resolve(__dirname, '../../web/out');
 
     const nodeExecutable = isPackaged ? process.execPath : 'node';
+    const resourcesNodeModules = isPackaged
+      ? path.join(process.resourcesPath, 'node_modules')
+      : path.resolve(__dirname, '../../../node_modules');
+
     const backendEnv: NodeJS.ProcessEnv = {
       ...process.env,
       PORT: String(port),
       DATABASE_URL: `file:${dbFilePath.replace(/\\/g, '/')}`,
       STATIC_WEB_DIR: staticWebDir,
+      NODE_PATH: resourcesNodeModules,
       NODE_ENV: 'production',
       ELECTRON_RUN_AS_NODE: '1',
     };
@@ -137,9 +142,14 @@ function startAgent(port: number): void {
     : path.resolve(__dirname, '../../agent/dist/index.js');
 
   const nodeExecutable = isPackaged ? process.execPath : 'node';
+  const resourcesNodeModules = isPackaged
+    ? path.join(process.resourcesPath, 'node_modules')
+    : path.resolve(__dirname, '../../../node_modules');
+
   const agentEnv: NodeJS.ProcessEnv = {
     ...process.env,
     API_BASE_URL: `http://127.0.0.1:${port}/api/v1`,
+    NODE_PATH: resourcesNodeModules,
     NODE_ENV: 'production',
     ELECTRON_RUN_AS_NODE: '1',
   };
