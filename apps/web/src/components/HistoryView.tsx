@@ -41,9 +41,16 @@ export const HistoryView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header & Export Action */}
-      <div className="p-5 rounded-xl border border-border bg-card shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="p-4 rounded border border-border bg-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-foreground">Operational History & Audit Log</h2>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              [AUDIT.LOG // HISTORICAL DISPATCH]
+            </span>
+            <h2 className="text-sm font-mono font-bold uppercase tracking-wide text-foreground">
+              Operations & Event Ledger
+            </h2>
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             Tamper-evident logs of scans, verified updates, exit codes, and administrator actions.
           </p>
@@ -51,82 +58,90 @@ export const HistoryView: React.FC = () => {
 
         <button
           onClick={handleExportCsv}
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-colors"
+          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-bold uppercase rounded border border-[#34785A] bg-[#34785A] hover:bg-[#2C664C] text-white shadow-sm transition-colors shrink-0"
         >
           <FileSpreadsheet className="w-4 h-4" />
-          Export Inventory CSV
+          <span>EXPORT INVENTORY CSV</span>
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-2 text-xs">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-mono">
         <button
           onClick={() => setActiveTab('updates')}
-          className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-            activeTab === 'updates' ? 'bg-blue-600 text-white' : 'hover:bg-accent text-muted-foreground'
+          className={`px-3 py-1.5 rounded uppercase font-bold transition-colors ${
+            activeTab === 'updates'
+              ? 'border border-[#F06435] bg-[#F06435] text-white'
+              : 'border border-border bg-background hover:bg-muted text-muted-foreground'
           }`}
         >
-          Update Executions ({historyData.updates?.length || 0})
+          UPDATE EXECUTIONS ({historyData.updates?.length || 0})
         </button>
         <button
           onClick={() => setActiveTab('scans')}
-          className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-            activeTab === 'scans' ? 'bg-blue-600 text-white' : 'hover:bg-accent text-muted-foreground'
+          className={`px-3 py-1.5 rounded uppercase font-bold transition-colors ${
+            activeTab === 'scans'
+              ? 'border border-[#F06435] bg-[#F06435] text-white'
+              : 'border border-border bg-background hover:bg-muted text-muted-foreground'
           }`}
         >
-          Discovery Scans ({historyData.scans?.length || 0})
+          DISCOVERY SCANS ({historyData.scans?.length || 0})
         </button>
         <button
           onClick={() => setActiveTab('audit')}
-          className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-            activeTab === 'audit' ? 'bg-blue-600 text-white' : 'hover:bg-accent text-muted-foreground'
+          className={`px-3 py-1.5 rounded uppercase font-bold transition-colors ${
+            activeTab === 'audit'
+              ? 'border border-[#F06435] bg-[#F06435] text-white'
+              : 'border border-border bg-background hover:bg-muted text-muted-foreground'
           }`}
         >
-          Security Audit Events ({historyData.auditEvents?.length || 0})
+          SECURITY AUDIT EVENTS ({historyData.auditEvents?.length || 0})
         </button>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="py-20 text-center text-muted-foreground text-xs">Loading operational history...</div>
+        <div className="py-20 text-center text-muted-foreground font-mono text-xs">
+          [QUERYING AUDIT HISTORY ARCHIVE...]
+        </div>
       ) : activeTab === 'updates' ? (
-        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+        <div className="rounded border border-border bg-card overflow-hidden">
           {historyData.updates?.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground text-xs">
-              No update executions recorded yet. Confirmed updates will appear here.
+            <div className="p-12 text-center text-muted-foreground font-mono text-xs">
+              [NO EXECUTED UPDATE OPERATIONS LOGGED YET]
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-muted/40 text-muted-foreground font-semibold">
-                    <th className="py-3 px-4">Application</th>
-                    <th className="py-3 px-4">Version Progression</th>
-                    <th className="py-3 px-4">Outcome</th>
-                    <th className="py-3 px-4">Exit Code</th>
-                    <th className="py-3 px-4">Verification Diagnostic</th>
-                    <th className="py-3 px-4 text-right">Timestamp</th>
+                  <tr className="border-b border-border bg-background/80 text-muted-foreground font-mono text-[10px] uppercase tracking-wider">
+                    <th className="py-2.5 px-4 font-bold">Application</th>
+                    <th className="py-2.5 px-4 font-bold">Progression</th>
+                    <th className="py-2.5 px-4 font-bold">Outcome</th>
+                    <th className="py-2.5 px-4 font-bold">Exit Code</th>
+                    <th className="py-2.5 px-4 font-bold">Diagnostics</th>
+                    <th className="py-2.5 px-4 text-right font-bold">Timestamp</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-y divide-border font-mono text-xs">
                   {historyData.updates.map((job: any) => (
-                    <tr key={job.id} className="hover:bg-accent/40 transition-colors">
-                      <td className="py-3 px-4 font-semibold text-foreground">{job.applicationName}</td>
-                      <td className="py-3 px-4 font-mono text-xs">
+                    <tr key={job.id} className="hover:bg-muted/40 transition-colors">
+                      <td className="py-2.5 px-4 font-semibold text-foreground">{job.applicationName}</td>
+                      <td className="py-2.5 px-4 text-xs">
                         <span className="text-muted-foreground">{job.installedVersion}</span>
-                        <span className="mx-1.5 text-blue-500">→</span>
-                        <span className="text-amber-500 font-bold">{job.targetVersion}</span>
+                        <span className="mx-1.5 text-[#F06435]">→</span>
+                        <span className="text-[#F06435] font-bold">{job.targetVersion}</span>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-2.5 px-4">
                         <StatusBadge status={job.status} size="sm" />
                       </td>
-                      <td className="py-3 px-4 font-mono text-xs">
+                      <td className="py-2.5 px-4 text-xs font-bold text-foreground">
                         {job.exitCode !== null ? job.exitCode : '—'}
                       </td>
-                      <td className="py-3 px-4 text-muted-foreground max-w-xs truncate">
+                      <td className="py-2.5 px-4 text-muted-foreground max-w-xs truncate font-sans text-xs">
                         {job.verificationResult || job.errorSummary || '—'}
                       </td>
-                      <td className="py-3 px-4 text-right text-muted-foreground">
+                      <td className="py-2.5 px-4 text-right text-muted-foreground text-[11px]">
                         {new Date(job.startedAt).toLocaleString()}
                       </td>
                     </tr>
@@ -137,33 +152,33 @@ export const HistoryView: React.FC = () => {
           )}
         </div>
       ) : activeTab === 'scans' ? (
-        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+        <div className="rounded border border-border bg-card overflow-hidden">
           {historyData.scans?.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground text-xs">
-              No scan history found. Run a scan to discover applications.
+            <div className="p-12 text-center text-muted-foreground font-mono text-xs">
+              [NO SCAN HISTORIES RECORDED]
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-muted/40 text-muted-foreground font-semibold">
-                    <th className="py-3 px-4">Device</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Packages Discovered</th>
-                    <th className="py-3 px-4">Updates Found</th>
-                    <th className="py-3 px-4 text-right">Completed At</th>
+                  <tr className="border-b border-border bg-background/80 text-muted-foreground font-mono text-[10px] uppercase tracking-wider">
+                    <th className="py-2.5 px-4 font-bold">Device Node</th>
+                    <th className="py-2.5 px-4 font-bold">Status</th>
+                    <th className="py-2.5 px-4 font-bold">Discovered</th>
+                    <th className="py-2.5 px-4 font-bold">Updates Identified</th>
+                    <th className="py-2.5 px-4 text-right font-bold">Completed At</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-y divide-border font-mono text-xs">
                   {historyData.scans.map((scan: any) => (
-                    <tr key={scan.id} className="hover:bg-accent/40 transition-colors">
-                      <td className="py-3 px-4 font-semibold text-foreground">{scan.device?.name || 'Local Host'}</td>
-                      <td className="py-3 px-4">
+                    <tr key={scan.id} className="hover:bg-muted/40 transition-colors">
+                      <td className="py-2.5 px-4 font-semibold text-foreground">{scan.device?.name || 'Local Host'}</td>
+                      <td className="py-2.5 px-4">
                         <StatusBadge status={scan.status} size="sm" />
                       </td>
-                      <td className="py-3 px-4 font-mono">{scan.totalFound}</td>
-                      <td className="py-3 px-4 font-mono font-bold text-amber-500">{scan.updatesFound}</td>
-                      <td className="py-3 px-4 text-right text-muted-foreground">
+                      <td className="py-2.5 px-4">{scan.totalFound}</td>
+                      <td className="py-2.5 px-4 font-bold text-[#F06435]">{scan.updatesFound}</td>
+                      <td className="py-2.5 px-4 text-right text-muted-foreground text-[11px]">
                         {scan.completedAt ? new Date(scan.completedAt).toLocaleString() : 'In Progress'}
                       </td>
                     </tr>
@@ -174,17 +189,17 @@ export const HistoryView: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-          <div className="divide-y divide-border text-xs">
+        <div className="rounded border border-border bg-card overflow-hidden">
+          <div className="divide-y divide-border font-mono text-xs">
             {historyData.auditEvents?.map((evt: any) => (
-              <div key={evt.id} className="p-3.5 flex items-center justify-between hover:bg-accent/40">
+              <div key={evt.id} className="p-3 flex items-center justify-between hover:bg-muted/40">
                 <div className="flex items-center gap-3">
-                  <span className="px-2 py-0.5 rounded bg-muted font-mono text-[10px] uppercase font-bold text-blue-400">
+                  <span className="px-1.5 py-0.5 rounded bg-background border border-border text-[9px] uppercase font-bold text-[#F06435]">
                     {evt.eventType}
                   </span>
-                  <span className="font-medium text-foreground">{evt.target || evt.actor}</span>
+                  <span className="font-semibold text-foreground">{evt.target || evt.actor}</span>
                   {evt.details && (
-                    <span className="text-muted-foreground font-mono text-[11px] truncate max-w-md">
+                    <span className="text-muted-foreground text-[11px] truncate max-w-md hidden md:inline">
                       {evt.details}
                     </span>
                   )}

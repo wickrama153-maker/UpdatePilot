@@ -205,7 +205,7 @@ function waitForBackend(url: string, timeoutMs: number = 25000): Promise<boolean
   });
 }
 
-// Splash HTML while services initialize
+// Splash HTML while services initialize (Swiss Engineering Interface)
 function getSplashHtml(): string {
   return `
     <!DOCTYPE html>
@@ -214,11 +214,16 @@ function getSplashHtml(): string {
       <meta charset="utf-8">
       <title>UpdatePilot</title>
       <style>
+        * { box-sizing: border-box; }
         body {
           margin: 0;
-          background: #0b1120;
-          color: #f8fafc;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          background-color: #1B1C1A;
+          background-image: 
+            linear-gradient(to right, rgba(56, 58, 53, 0.4) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(56, 58, 53, 0.4) 1px, transparent 1px);
+          background-size: 24px 24px;
+          color: #F3EFE5;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -226,54 +231,105 @@ function getSplashHtml(): string {
           user-select: none;
         }
         .container {
+          background: #242623;
+          border: 1px solid #383A35;
+          border-radius: 4px;
+          padding: 36px 44px;
           text-align: center;
+          max-width: 440px;
+          width: 90%;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
-        .logo {
-          width: 72px;
-          height: 72px;
-          margin-bottom: 20px;
-          animation: pulse 2s infinite ease-in-out;
+        .glyph {
+          width: 52px;
+          height: 52px;
+          margin: 0 auto 20px;
+          border: 1px solid #F06435;
+          background: rgba(240, 100, 53, 0.1);
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        h1 {
-          margin: 0 0 8px;
-          font-size: 24px;
-          font-weight: 700;
-          letter-spacing: -0.5px;
-        }
-        p {
-          margin: 0 0 24px;
-          color: #94a3b8;
-          font-size: 14px;
-        }
-        .spinner {
+        .glyph svg {
           width: 32px;
           height: 32px;
-          border: 3px solid rgba(56, 189, 248, 0.2);
-          border-top-color: #38bdf8;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-          margin: 0 auto;
+          stroke: #F06435;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.95; } 50% { transform: scale(1.05); opacity: 1; } }
+        .tag {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.15em;
+          color: #F06435;
+          text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+        h1 {
+          margin: 0 0 6px;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 20px;
+          font-weight: 900;
+          letter-spacing: 0.12em;
+          color: #F3EFE5;
+          text-transform: uppercase;
+        }
+        p {
+          margin: 0 0 22px;
+          color: #9E9F97;
+          font-size: 12px;
+          line-height: 1.5;
+        }
+        .progress-bar {
+          width: 100%;
+          height: 3px;
+          background: #2D302C;
+          border-radius: 1px;
+          overflow: hidden;
+          position: relative;
+        }
+        .progress-indicator {
+          width: 40%;
+          height: 100%;
+          background: #F06435;
+          position: absolute;
+          animation: slide 1.4s ease-in-out infinite;
+        }
+        @keyframes slide {
+          0% { left: -40%; width: 30%; }
+          50% { left: 40%; width: 50%; }
+          100% { left: 100%; width: 30%; }
+        }
+        .status-feed {
+          margin-top: 18px;
+          padding-top: 14px;
+          border-top: 1px solid #383A35;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 10px;
+          color: #77786F;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
       </style>
     </head>
     <body>
       <div class="container">
-        <svg class="logo" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="256" height="256" rx="52" fill="#1e293b"/>
-          <path d="M128 64L192 184L128 156L64 184L128 64Z" fill="url(#grad)"/>
-          <circle cx="176" cy="68" r="10" fill="#10b981"/>
-          <defs>
-            <linearGradient id="grad" x1="64" y1="64" x2="192" y2="184" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#2563eb"/>
-              <stop offset="1" stop-color="#06b6d4"/>
-            </linearGradient>
-          </defs>
-        </svg>
+        <div class="glyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+            <path d="M12 3L20 19H4L12 3Z" stroke-linejoin="miter" />
+            <path d="M12 9V15" stroke-linecap="square" />
+            <circle cx="12" cy="18" r="0.5" fill="#F06435" stroke-width="1" />
+          </svg>
+        </div>
+        <div class="tag">[SUBSYSTEM BOOT]</div>
         <h1>UpdatePilot</h1>
-        <p>Initializing Windows Software Update Intelligence Services...</p>
-        <div class="spinner"></div>
+        <p>Initializing Windows Software Update Intelligence & Management Platform...</p>
+        <div class="progress-bar">
+          <div class="progress-indicator"></div>
+        </div>
+        <div class="status-feed">
+          CONNECTING PERSISTENCE // WINGET IPC BRIDGE
+        </div>
       </div>
     </body>
     </html>
@@ -291,7 +347,7 @@ function createWindow() {
     minHeight: 680,
     title: 'UpdatePilot',
     icon: fs.existsSync(iconPath) ? iconPath : undefined,
-    backgroundColor: '#0b1120',
+    backgroundColor: '#1B1C1A',
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
@@ -393,13 +449,18 @@ app.whenReady().then(async () => {
   } else if (mainWindow) {
     console.error('[Main] Backend failed to report healthy status within timeout.');
     mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`
-      <div style="background:#0b1120;color:#f8fafc;font-family:sans-serif;padding:40px;text-align:center;">
-        <h2 style="color:#ef4444;">Service Startup Error</h2>
-        <p>Unable to connect to UpdatePilot Backend API on port ${activePort}.</p>
-        <p style="color:#94a3b8;font-size:12px;">Logs are located at: ${path.join(logsDir, 'backend.log')}</p>
-        <button onclick="location.reload()" style="background:#2563eb;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;margin-top:16px;">
-          Retry Startup
-        </button>
+      <div style="background:#1B1C1A;color:#F3EFE5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:48px;height:100vh;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">
+        <div style="background:#242623;border:1px solid #383A35;border-radius:4px;padding:36px 44px;max-width:480px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+          <div style="font-family:ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.15em;color:#B8433D;text-transform:uppercase;margin-bottom:8px;">[SYSTEM FAULT // TIME-OUT]</div>
+          <h2 style="font-family:ui-monospace,monospace;font-size:18px;font-weight:900;letter-spacing:0.08em;color:#F3EFE5;margin:0 0 12px;text-transform:uppercase;">Service Startup Timeout</h2>
+          <p style="color:#9E9F97;font-size:12px;line-height:1.5;margin:0 0 16px;">Unable to establish communication with UpdatePilot Backend API on active port ${activePort}.</p>
+          <div style="background:#1B1C1A;border:1px solid #383A35;border-radius:3px;padding:10px 12px;font-family:ui-monospace,monospace;font-size:10px;color:#77786F;word-break:break-all;text-align:left;margin-bottom:20px;">
+            LOG: ${path.join(logsDir, 'backend.log')}
+          </div>
+          <button onclick="location.reload()" style="background:#F06435;color:#fff;border:none;padding:10px 24px;border-radius:3px;font-family:ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;">
+            RETRY INITIALIZATION
+          </button>
+        </div>
       </div>
     `)}`);
   }

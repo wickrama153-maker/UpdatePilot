@@ -10,6 +10,8 @@ import {
   Info,
   Clock,
   RotateCcw,
+  X,
+  Check,
 } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import { api } from '../lib/api';
@@ -140,36 +142,45 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Overview Banner */}
-      <div className="p-5 rounded-xl border border-border bg-card shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="p-4 rounded border border-border bg-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-foreground">Verified Package Updates</h2>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] font-bold text-[#F06435] uppercase tracking-wider">
+              [DISCOVERY // WINGET REPOSITORY]
+            </span>
+            <h2 className="text-sm font-mono font-bold uppercase tracking-wide text-foreground">
+              Verified Upgrade Center
+            </h2>
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Software updates detected via Windows Package Manager. Every update is previewed and executed only after your explicit confirmation.
+            Software packages with newer verified releases in the Windows Package Manager catalog. All updates require explicit user confirmation.
           </p>
         </div>
         <button
           onClick={fetchUpdates}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background hover:bg-accent text-foreground transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold uppercase rounded border border-border bg-background hover:bg-muted text-foreground transition-colors shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh Available
+          <span>QUERY WINGET</span>
         </button>
       </div>
 
       {/* Updates Cards Grid */}
       {loading ? (
-        <div className="py-20 text-center text-muted-foreground text-xs">
-          Loading verified software updates...
+        <div className="py-20 text-center text-muted-foreground font-mono text-xs">
+          [SCANNING REPOSITORIES FOR COMPATIBLE PACKAGES...]
         </div>
       ) : updates.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl border border-dashed border-border bg-card">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 mx-auto flex items-center justify-center mb-3">
-            <CheckCircle2 className="w-6 h-6" />
+        <div className="p-12 text-center rounded border border-border bg-card">
+          <div className="w-10 h-10 rounded border border-[#34785A] bg-[#34785A]/10 text-[#34785A] dark:text-[#4AA880] mx-auto flex items-center justify-center mb-3">
+            <CheckCircle2 className="w-5 h-5" />
           </div>
-          <h3 className="text-sm font-bold text-foreground">Your Software is Up to Date</h3>
-          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-            All detected WinGet packages are currently running the latest verified release versions.
+          <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-foreground">
+            System Up to Date
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto font-mono">
+            All detected WinGet packages match or exceed upstream release versions.
           </p>
         </div>
       ) : (
@@ -177,51 +188,57 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
           {updates.map((app) => (
             <div
               key={app.id}
-              className="p-5 rounded-xl border border-border bg-card hover:border-blue-500/40 hover:shadow-md transition-all flex flex-col justify-between"
+              className="p-4 rounded border border-border bg-card hover:border-[#F06435]/60 transition-all flex flex-col justify-between"
             >
               <div>
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-bold text-sm text-foreground leading-snug">{app.name}</h3>
+                <div className="flex items-start justify-between gap-2 border-b border-border pb-2">
+                  <h3 className="font-bold text-sm text-foreground leading-snug truncate" title={app.name}>
+                    {app.name}
+                  </h3>
                   <StatusBadge status="UPDATE_AVAILABLE" size="sm" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">{app.publisher || 'Verified Package'}</p>
+                <p className="text-xs text-muted-foreground mt-1 font-mono">{app.publisher || 'Verified Package'}</p>
 
-                {/* Version comparison box */}
-                <div className="mt-4 p-3 rounded-lg border border-border bg-background/60 grid grid-cols-2 gap-2 text-xs">
+                {/* Monospace Version Comparison Matrix */}
+                <div className="mt-3 p-3 rounded border border-border bg-background grid grid-cols-2 gap-2 text-xs font-mono">
                   <div>
-                    <span className="text-[11px] text-muted-foreground">Installed</span>
-                    <p className="font-mono font-medium text-foreground truncate">{app.installedVersion}</p>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">
+                      INSTALLED
+                    </span>
+                    <p className="font-medium text-foreground truncate mt-0.5">{app.installedVersion}</p>
                   </div>
                   <div>
-                    <span className="text-[11px] text-amber-500 font-semibold">Available Target</span>
-                    <p className="font-mono font-bold text-amber-500 truncate">{app.availableVersion}</p>
+                    <span className="text-[10px] text-[#F06435] font-bold uppercase tracking-wider block">
+                      TARGET UPGRADE
+                    </span>
+                    <p className="font-bold text-[#F06435] truncate mt-0.5">{app.availableVersion}</p>
                   </div>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span>Source: <strong className="uppercase font-mono text-foreground">{app.source}</strong></span>
-                  <span className="font-mono truncate max-w-[140px]">{app.packageId}</span>
+                <div className="mt-2.5 flex items-center justify-between text-[10px] font-mono text-muted-foreground">
+                  <span>SRC: <strong className="uppercase text-foreground">{app.source}</strong></span>
+                  <span className="truncate max-w-[140px]">{app.packageId}</span>
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-border flex items-center justify-between">
+              <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
                 {app.publisherUrl ? (
                   <a
                     href={app.publisherUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs text-blue-500 hover:underline inline-flex items-center gap-1"
+                    className="text-xs font-mono text-[#F06435] hover:underline inline-flex items-center gap-1"
                   >
-                    Release Page <ExternalLink className="w-3 h-3" />
+                    Release Notes <ExternalLink className="w-3 h-3" />
                   </a>
                 ) : (
                   <span />
                 )}
                 <button
                   onClick={() => handleOpenPreview(app)}
-                  className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition-colors"
+                  className="px-3 py-1.5 text-xs font-mono font-bold uppercase rounded bg-[#F06435] hover:bg-[#D95528] text-white shadow-sm transition-colors"
                 >
-                  Review & Update
+                  REVIEW & UPDATE
                 </button>
               </div>
             </div>
@@ -229,119 +246,128 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
         </div>
       )}
 
-      {/* Confirmation & Execution Modal */}
+      {/* Confirmation & Execution Modal: Swiss Engineering Industrial Control */}
       {selectedApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in duration-100">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-                  <ArrowUpCircle className="w-5 h-5" />
+            <div className="flex items-center justify-between p-4 border-b border-border bg-background/80">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded border border-[#F06435] bg-[#F06435]/10 text-[#F06435]">
+                  <ArrowUpCircle className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-foreground">Review & Confirm Update</h3>
-                  <p className="text-xs text-muted-foreground">Explicit user authorization required</p>
+                  <h3 className="text-sm font-bold text-foreground font-mono uppercase tracking-wide">
+                    Confirm Software Update
+                  </h3>
+                  <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-widest">
+                    [DISPATCH // VERIFICATION GATE]
+                  </p>
                 </div>
               </div>
               {!isExecuting && (
                 <button
                   onClick={handleCloseModal}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-accent"
+                  className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
+                  aria-label="Close dialog"
                 >
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
             {/* Modal Body */}
-            <div className="p-5 space-y-4 text-xs">
+            <div className="p-5 space-y-4 text-xs font-mono">
               {jobError && (
-                <div className="p-3 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs flex items-center gap-2">
+                <div className="p-3 rounded border border-[#B8433D]/40 bg-[#B8433D]/10 text-[#B8433D] dark:text-[#D95F59] text-xs flex items-center gap-2">
                   <XCircle className="w-4 h-4 shrink-0" />
                   <span>{jobError}</span>
                 </div>
               )}
 
               {/* Version Comparison Card */}
-              <div className="p-4 rounded-xl border border-border bg-background space-y-3">
-                <div className="flex items-center justify-between">
+              <div className="p-3.5 rounded border border-border bg-background space-y-2.5">
+                <div className="flex items-center justify-between border-b border-border pb-2">
                   <span className="font-bold text-sm text-foreground">{selectedApp.name}</span>
-                  <span className="px-2 py-0.5 rounded bg-muted font-mono uppercase text-[10px] text-muted-foreground">
+                  <span className="px-1.5 py-0.5 rounded bg-muted border border-border uppercase text-[9px] text-muted-foreground">
                     {selectedApp.source}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
+                <div className="grid grid-cols-2 gap-3 pt-1">
                   <div>
-                    <span className="text-muted-foreground">Current Installed</span>
-                    <p className="font-mono text-sm font-semibold text-foreground mt-0.5">
+                    <span className="text-muted-foreground text-[10px] uppercase tracking-wider">
+                      CURRENT INSTALLED
+                    </span>
+                    <p className="text-sm font-semibold text-foreground mt-0.5">
                       {selectedApp.installedVersion}
                     </p>
                   </div>
                   <div>
-                    <span className="text-amber-500 font-semibold">Target Version</span>
-                    <p className="font-mono text-sm font-bold text-amber-500 mt-0.5">
+                    <span className="text-[#F06435] text-[10px] font-bold uppercase tracking-wider">
+                      TARGET VERSION
+                    </span>
+                    <p className="text-sm font-bold text-[#F06435] mt-0.5">
                       {previewData?.targetVersion || selectedApp.availableVersion}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-border text-[11px] text-muted-foreground flex items-center justify-between">
-                  <span>WinGet Package ID:</span>
-                  <span className="font-mono font-medium text-foreground">{selectedApp.packageId}</span>
+                <div className="pt-2 border-t border-border/60 text-[11px] text-muted-foreground flex items-center justify-between">
+                  <span>WINGET IDENTIFIER:</span>
+                  <span className="font-semibold text-foreground">{selectedApp.packageId}</span>
                 </div>
               </div>
 
-              {/* Warnings Box */}
-              <div className="p-3.5 rounded-xl border border-amber-500/20 bg-amber-500/5 space-y-1.5">
-                <div className="flex items-center gap-2 font-semibold text-amber-500">
+              {/* Safety Information Box */}
+              <div className="p-3.5 rounded border border-[#C88B24]/30 bg-[#C88B24]/5 space-y-1.5">
+                <div className="flex items-center gap-2 font-bold text-[#C88B24] dark:text-[#E0A238] uppercase tracking-wide text-[11px]">
                   <AlertTriangle className="w-4 h-4" />
-                  <span>Update Safety Information</span>
+                  <span>EXECUTION PROTOCOL & PRECAUTIONS</span>
                 </div>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground text-[11px] pl-1">
-                  <li>The installer will be executed via Windows Package Manager (WinGet).</li>
-                  <li>Please save unsaved work in {selectedApp.name} before starting.</li>
-                  <li>Certain packages may require elevation or a system reboot to finish.</li>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground text-[11px] pl-1 font-sans">
+                  <li>The installer will be executed via Windows Package Manager (<code className="font-mono">winget upgrade</code>).</li>
+                  <li>Please save unsaved work in {selectedApp.name} prior to proceeding.</li>
+                  <li>Certain packages may require administrative elevation or a system reboot to finalize.</li>
                 </ul>
               </div>
 
               {/* Active Execution Status View */}
               {activeJob && (
-                <div className="p-4 rounded-xl border border-border bg-background space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-foreground">Execution Progress</span>
+                <div className="p-3.5 rounded border border-border bg-background space-y-3">
+                  <div className="flex items-center justify-between border-b border-border pb-2">
+                    <span className="font-bold text-foreground">EXECUTION MONITOR</span>
                     <StatusBadge status={activeJob.status} size="sm" />
                   </div>
 
                   {isExecuting && (
-                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                      <div className="bg-blue-600 h-2 rounded-full w-2/3 animate-pulse" />
+                    <div className="w-full bg-muted rounded h-2 overflow-hidden border border-border">
+                      <div className="bg-[#F06435] h-2 w-2/3 animate-pulse" />
                     </div>
                   )}
 
                   {activeJob.verificationResult && (
-                    <p className="text-[11px] text-muted-foreground bg-card p-2.5 rounded-lg border border-border">
+                    <p className="text-[11px] text-muted-foreground bg-card p-2 rounded border border-border">
                       {activeJob.verificationResult}
                     </p>
                   )}
 
                   {activeJob.status === 'COMPLETED' && (
-                    <div className="flex items-center gap-2 text-emerald-400 font-medium">
+                    <div className="flex items-center gap-2 text-[#34785A] dark:text-[#4AA880] font-bold">
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Update completed and verified successfully!</span>
                     </div>
                   )}
 
                   {activeJob.status === 'REBOOT_REQUIRED' && (
-                    <div className="flex items-center gap-2 text-sky-400 font-medium">
+                    <div className="flex items-center gap-2 text-[#2A7488] dark:text-[#4FB2CC] font-bold">
                       <RotateCcw className="w-4 h-4" />
                       <span>Update installed. System restart is required to finish.</span>
                     </div>
                   )}
 
                   {activeJob.status === 'FAILED' && (
-                    <div className="flex items-center gap-2 text-rose-400 font-medium">
+                    <div className="flex items-center gap-2 text-[#B8433D] dark:text-[#D95F59] font-bold">
                       <XCircle className="w-4 h-4" />
                       <span>Update failed. Review diagnostics in History.</span>
                     </div>
@@ -349,16 +375,16 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
                 </div>
               )}
 
-              {/* User Confirmation Checkbox */}
+              {/* User Explicit Confirmation Checkbox */}
               {!activeJob && (
-                <label className="flex items-start gap-3 p-3 rounded-lg border border-border bg-background hover:bg-accent/30 cursor-pointer select-none">
+                <label className="flex items-start gap-3 p-3 rounded border border-border bg-background hover:bg-muted/40 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={confirmedByUser}
                     onChange={(e) => setConfirmedByUser(e.target.checked)}
-                    className="mt-0.5 rounded border-border text-blue-600 focus:ring-blue-500"
+                    className="mt-0.5 rounded border-border text-[#F06435] focus:ring-[#F06435]"
                   />
-                  <span className="text-xs text-foreground font-medium leading-relaxed">
+                  <span className="text-xs text-foreground font-semibold leading-relaxed font-sans">
                     I confirm that I want to execute this software update on this Windows machine now.
                   </span>
                 </label>
@@ -366,31 +392,31 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-border bg-background/50">
+            <div className="flex items-center justify-end gap-2 p-3.5 border-t border-border bg-background/50 font-mono">
               {isExecuting && activeJob && (
                 <button
                   onClick={handleCancelActiveJob}
-                  className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-rose-600/10 text-rose-400 border border-rose-500/20 hover:bg-rose-600/20"
+                  className="px-3.5 py-1.5 text-xs font-bold uppercase rounded bg-[#B8433D]/10 text-[#B8433D] dark:text-[#D95F59] border border-[#B8433D]/30 hover:bg-[#B8433D]/20"
                 >
-                  Cancel In-Progress Job
+                  ABORT JOB
                 </button>
               )}
 
               <button
                 onClick={handleCloseModal}
                 disabled={isExecuting}
-                className="px-4 py-2 text-xs font-semibold rounded-lg border border-border hover:bg-accent disabled:opacity-50 text-foreground"
+                className="px-3.5 py-1.5 text-xs font-semibold uppercase rounded border border-border hover:bg-muted disabled:opacity-40 text-foreground"
               >
-                {activeJob ? 'Done' : 'Cancel'}
+                {activeJob ? 'DONE' : 'CANCEL'}
               </button>
 
               {!activeJob && (
                 <button
                   onClick={handleConfirmAndExecute}
                   disabled={!confirmedByUser || isExecuting}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all"
+                  className="px-4 py-1.5 text-xs font-bold uppercase rounded bg-[#F06435] text-white hover:bg-[#D95528] disabled:opacity-30 disabled:cursor-not-allowed shadow-sm transition-all"
                 >
-                  Confirm & Execute Update
+                  EXECUTE UPDATE
                 </button>
               )}
             </div>
