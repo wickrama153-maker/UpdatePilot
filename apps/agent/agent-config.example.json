@@ -1,0 +1,11 @@
+{
+  "backendUrl": "http://localhost:4000",
+  "deviceId": null,
+  "agentToken": null,
+  "deviceName": "Local Workstation",
+  "osName": "Windows",
+  "osVersion": "Windows 10/11",
+  "architecture": "x64",
+  "agentVersion": "1.0.0",
+  "pollIntervalMs": 5000
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.updatepilot.desktop",
+  "productName": "UpdatePilot",
+  "electronVersion": "31.7.7",
+  "copyright": "Copyright © 2026 UpdatePilot Software",
+  "directories": {
+    "output": "../../dist/installer",
+    "buildResources": "assets"
+  },
+  "files": [
+    "dist/**/*",
+    "assets/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "build-resources",
+      "to": ".",
+      "filter": ["**/*"]
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "assets/icon.ico",
+    "publisherName": "UpdatePilot Software",
+    "requestedExecutionLevel": "asInvoker"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "UpdatePilot",
+    "installerIcon": "assets/icon.ico",
+    "uninstallerIcon": "assets/icon.ico",
+    "installerHeaderIcon": "assets/icon.ico",
+    "uninstallDisplayName": "UpdatePilot",
+    "runAfterFinish": true,
+    "artifactName": "UpdatePilot-Setup-${version}.${ext}"
+  }
+}

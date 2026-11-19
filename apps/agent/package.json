@@ -1,0 +1,26 @@
+{
+  "name": "@updatepilot/agent",
+  "version": "1.0.0",
+  "description": "Windows Local Agent for UpdatePilot",
+  "main": "dist/index.js",
+  "bin": {
+    "updatepilot-agent": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "pair": "ts-node src/index.ts --pair",
+    "scan": "ts-node src/index.ts --scan"
+  },
+  "dependencies": {
+    "@updatepilot/shared": "file:../../packages/shared",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}

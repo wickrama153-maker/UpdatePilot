@@ -1,0 +1,71 @@
+# ==============================================================================
+# UpdatePilot — Production Git Ignore Specification
+# ==============================================================================
+
+# 1. Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# 2. Build Outputs, Transpilation & Packaged Binaries
+dist/
+build/
+out/
+.next/
+UpdatePilot/
+apps/desktop/build-resources/
+apps/agent/bundled/
+apps/agent/installer/*.exe
+apps/web/public/downloads/*.exe
+*.exe
+*.msi
+
+# 3. SQLite Databases & Local Development State (Zero Data Leakage)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+apps/backend/prisma/*.db
+apps/backend/prisma/clean.db
+apps/backend/prisma/dev.db
+apps/backend/prisma/prisma/
+
+# 4. Environment Variables & Agent Identity Secrets
+.env
+.env*.local
+.env.development
+.env.test
+.env.production
+!.env.example
+agent-config.json
+apps/agent/agent-config.json
+apps/agent/agent-config.local.json
+
+# 5. Logs & System Diagnostics
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+.system_generated/
+
+# 6. Test & Coverage Artifacts
+coverage/
+.nyc_output/
+
+# 7. Monorepo & Build Cache
+.turbo/
+.cache/
+*.tsbuildinfo
+
+# 8. Operating System & Editor Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
