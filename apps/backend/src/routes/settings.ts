@@ -22,16 +22,27 @@ router.patch('/', async (req: Request, res: Response) => {
   try {
     const { theme, scanIntervalHours, autoCheckUpdates, notifyOnUpdate, telemetryEnabled, retentionDays } = req.body;
 
-    const updated = await prisma.userSettings.update({
+    const updateData = {
+      ...(theme ? { theme } : {}),
+      ...(scanIntervalHours !== undefined ? { scanIntervalHours: Number(scanIntervalHours) } : {}),
+      ...(autoCheckUpdates !== undefined ? { autoCheckUpdates: Boolean(autoCheckUpdates) } : {}),
+      ...(notifyOnUpdate !== undefined ? { notifyOnUpdate: Boolean(notifyOnUpdate) } : {}),
+      ...(telemetryEnabled !== undefined ? { telemetryEnabled: Boolean(telemetryEnabled) } : {}),
+      ...(retentionDays !== undefined ? { retentionDays: Number(retentionDays) } : {}),
+      updatedAt: new Date(),
+    };
+
+    const updated = await prisma.userSettings.upsert({
       where: { id: 'default' },
-      data: {
-        ...(theme ? { theme } : {}),
-        ...(scanIntervalHours !== undefined ? { scanIntervalHours: Number(scanIntervalHours) } : {}),
-        ...(autoCheckUpdates !== undefined ? { autoCheckUpdates: Boolean(autoCheckUpdates) } : {}),
-        ...(notifyOnUpdate !== undefined ? { notifyOnUpdate: Boolean(notifyOnUpdate) } : {}),
-        ...(telemetryEnabled !== undefined ? { telemetryEnabled: Boolean(telemetryEnabled) } : {}),
-        ...(retentionDays !== undefined ? { retentionDays: Number(retentionDays) } : {}),
-        updatedAt: new Date(),
+      update: updateData,
+      create: {
+        id: 'default',
+        theme: theme || 'dark',
+        scanIntervalHours: scanIntervalHours !== undefined ? Number(scanIntervalHours) : 24,
+        autoCheckUpdates: autoCheckUpdates !== undefined ? Boolean(autoCheckUpdates) : true,
+        notifyOnUpdate: notifyOnUpdate !== undefined ? Boolean(notifyOnUpdate) : true,
+        telemetryEnabled: telemetryEnabled !== undefined ? Boolean(telemetryEnabled) : false,
+        retentionDays: retentionDays !== undefined ? Number(retentionDays) : 90,
       },
     });
 

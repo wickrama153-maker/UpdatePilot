@@ -46,6 +46,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8080
 ENV STATIC_WEB_DIR=/app/apps/web/out
+ENV PATH="/app/node_modules/.bin:$PATH"
 
 # Install openssl for Prisma engine
 RUN apk add --no-cache openssl
