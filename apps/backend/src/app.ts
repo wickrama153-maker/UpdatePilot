@@ -54,8 +54,8 @@ app.use('/api/v1', async (_req: Request, _res: Response, next: NextFunction) => 
 // Swagger UI documentation
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Healthcheck
-app.get('/api/v1/health', (req: Request, res: Response) => {
+// Healthcheck endpoints (both root and api-versioned)
+app.get(['/health', '/api/v1/health'], (req: Request, res: Response) => {
   res.json({
     status: 'ok',
     service: 'UpdatePilot Backend API',

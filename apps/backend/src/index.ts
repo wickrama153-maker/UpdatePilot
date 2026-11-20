@@ -19,8 +19,12 @@ const HOST = '0.0.0.0';
 const server = app.listen(PORT, HOST, async () => {
   logger.info(`UpdatePilot Backend API running on http://${HOST}:${PORT}`);
   logger.info(`OpenAPI Documentation available at /api/docs`);
-  await ensureUpdateJobSchema();
-  startScheduler();
+  try {
+    await ensureUpdateJobSchema();
+    startScheduler();
+  } catch (err: any) {
+    logger.error('Startup initialization error:', { error: err.message, stack: err.stack });
+  }
 });
 
 // Port 3000 Helper (Local Development Only): If a user enters http://localhost:3000,
