@@ -13,10 +13,11 @@ try {
   process.exit(1);
 }
 
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT) || 4000;
+const HOST = '0.0.0.0';
 
-const server = app.listen(PORT, async () => {
-  logger.info(`UpdatePilot Backend API running on port ${PORT}`);
+const server = app.listen(PORT, HOST, async () => {
+  logger.info(`UpdatePilot Backend API running on http://${HOST}:${PORT}`);
   logger.info(`OpenAPI Documentation available at /api/docs`);
   await ensureUpdateJobSchema();
   startScheduler();

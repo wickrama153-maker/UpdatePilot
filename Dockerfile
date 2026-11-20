@@ -26,9 +26,9 @@ COPY apps/agent ./apps/agent
 # Build shared library
 RUN npm run build --workspace=packages/shared
 
-# Generate Prisma Client & Build Backend
+# Generate Production PostgreSQL Prisma Client & Build Backend
 WORKDIR /app/apps/backend
-RUN npx prisma generate
+RUN npx prisma generate --schema=prisma/schema.postgresql.prisma
 RUN npm run build
 
 # Build Web Frontend (Static Export to out/)
@@ -44,8 +44,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=4000
-ENV DATABASE_URL=file:/data/updatepilot.db
+ENV PORT=8080
 ENV STATIC_WEB_DIR=/app/apps/web/out
 
 # Install openssl for Prisma engine
@@ -65,8 +64,8 @@ COPY --from=builder /app/apps/backend/package*.json ./apps/backend/
 COPY --from=builder /app/apps/web/out ./apps/web/out
 COPY scripts/prepare-prisma.mjs ./scripts/prepare-prisma.mjs
 
-# Expose HTTP port
-EXPOSE 4000
+# Expose HTTP ports (Railway default 8080, Render/Fallback 4000)
+EXPOSE 8080 4000
 
 # Push pristine schema to PostgreSQL or SQLite based on DATABASE_URL, then start backend server
 CMD ["sh", "-c", "node scripts/prepare-prisma.mjs && node apps/backend/dist/index.js"]
